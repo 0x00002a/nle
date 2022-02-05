@@ -34,7 +34,7 @@ local function process_spec(spec)
         end)()
         local fid = fstore.set(spec)
 
-        return args_to_vim({ nargs = nb_args }), fstore.fmt_for_vim_cmd(fid)
+        return args_to_vim({ nargs = nb_args }), fstore.fmt_for_vim_cmd(fid, info.isvararg or (info.nparams > 0))
     end
 end
 
