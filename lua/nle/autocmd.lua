@@ -1,3 +1,4 @@
+local fstore = require('nle.func-store')
 -- modified version of: https://gist.github.com/numToStr/1ab83dd2e919de9235f9f774ef8076da
 
 local function autocmd(this, event, spec)
@@ -17,36 +18,21 @@ local function autocmd(this, event, spec)
     vim.cmd('autocmd ' .. e .. ' ' .. pattern .. ' ' .. action)
 end
 
-local S = {
-    __au = {}
-}
-
 local M = setmetatable({}, {
-    __index = S,
+    __index = fstore,
     __newindex = autocmd,
     __call = autocmd,
 })
 
-function S.exec(id)
-    S.__au[id]()
-end
 
-function S.set(cmd)
-    local fn = cmd
-    local id = string.format("%p", fn)
-    S.__au[id] = fn
-    return string.format('lua require("autocmd").exec("%s")', id)
-end
-
-
-function S.group(grp, cmds)
+function M.group(grp, cmds)
     vim.cmd('augroup' .. grp)
     vim.cmd('autocmd!')
     if type(cmds) == 'function' then
         cmds(M)
     else
         for _, au in ipairs(cmds) do
-           autocmd(S, au[1], {au[2], au[3]})
+           autocmd(M, au[1], {au[2], au[3]})
         end
     end
 end
