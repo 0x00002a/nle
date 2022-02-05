@@ -6,7 +6,7 @@ local function autocmd(this, event, spec)
     local pattern = is_tbl and spec[1] or '*'
     local action = is_tbl and spec[2] or spec
     if type(action) == 'function' then
-        action = this.set(action)
+        action = this.fmt_for_vim(this.set(action))
     elseif type(action) == 'table' then
         for _, c in pairs(action) do
             autocmd(this, event, c)
@@ -18,24 +18,25 @@ local function autocmd(this, event, spec)
     vim.cmd('autocmd ' .. e .. ' ' .. pattern .. ' ' .. action)
 end
 
-local M = setmetatable({}, {
+local M = {}
+
+function M.group(grp, cmds)
+    vim.cmd('augroup ' .. grp)
+    vim.cmd('autocmd!')
+    for name, au in pairs(cmds) do
+        if type(name) ~= 'table' then
+            name = {name}
+        end
+        for _, n in pairs(name) do
+            autocmd(M, n, au)
+        end
+    end
+    vim.cmd('augroup END')
+end
+
+return setmetatable(M, {
     __index = fstore,
     __newindex = autocmd,
     __call = autocmd,
 })
-
-
-function M.group(grp, cmds)
-    vim.cmd('augroup' .. grp)
-    vim.cmd('autocmd!')
-    if type(cmds) == 'function' then
-        cmds(M)
-    else
-        for _, au in ipairs(cmds) do
-           autocmd(M, au[1], {au[2], au[3]})
-        end
-    end
-end
-
-return M
 

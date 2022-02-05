@@ -17,8 +17,8 @@ function S.fmt_for_vim(id)
     return string.format("lua require('nle.func-store').exec('%s')", id)
 end
 
-function S.fmt_for_vim_cmd(id)
-    return string.format("lua require('nle.func-store').exec('%s', <f-args>)", id)
+function S.fmt_for_vim_cmd(id, has_args)
+    return string.format("lua require('nle.func-store').exec('%s'%s)", id, (has_args and ',<f-args>') or '')
 end
 
 return S
