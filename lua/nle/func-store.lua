@@ -3,8 +3,8 @@ local S = {
     __fn = {}
 }
 
-function S.exec(id)
-    S.__fn[id]()
+function S.exec(id, ...)
+    S.__fn[id](...)
 end
 function S.set(fn)
     local id = string.format("%p", fn)
