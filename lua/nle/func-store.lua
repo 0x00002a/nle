@@ -1,3 +1,4 @@
+-- Stores lua functions for use in vimscript callbacks
 
 local S = {
     __fn = {}
@@ -14,6 +15,10 @@ end
 
 function S.fmt_for_vim(id)
     return string.format("lua require('nle.func-store').exec('%s')", id)
+end
+
+function S.fmt_for_vim_cmd(id)
+    return string.format("lua require('nle.func-store').exec('%s', <f-args>)", id)
 end
 
 return S

@@ -34,21 +34,24 @@ local function process_spec(spec)
         end)()
         local fid = fstore.set(spec)
 
-        return args_to_vim({ nargs = nb_args }), string.format('lua require("nle.func-store").exec("%s", <f-args>)', fid)
+        return args_to_vim({ nargs = nb_args }), fstore.fmt_for_vim_cmd(fid)
     end
 end
 
 local function add_cmd(name, spec)
     local args, repl = process_spec(spec)
     local bang = type(spec) == 'table' and spec.bang
-    vim.cmd(string.format("command%s %s%s %s", (bang and '!') or '', args, name, repl))
+    return string.format("command%s %s%s %s", (bang and '!') or '', args, name, repl)
 end
 
 
 local M = {}
 
+function M.build(name, spec)
+    return add_cmd(name, spec)
+end
 function M.add(name, spec)
-    add_cmd(name, spec)
+    vim.cmd(M.build(name, spec))
 end
 function M.rm(name)
     vim.cmd("delcommand " .. name)
