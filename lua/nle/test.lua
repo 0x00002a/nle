@@ -29,6 +29,23 @@ test_unit("command", {
         check_eq(cmd.build('TestCmd', { fn = func }), expected1)
     end
 })
+local vars = require('nle.variables')
+test_unit('variables', {
+    ['assigning var.g sets a global value'] = function()
+        vars.g.testvar = 1
+        check_eq(vim.api.nvim_eval('g:testvar'), 1)
+    end,
+    ['reading from an unset var returns nil'] = function()
+        check_eq(vars.g.doesnotexist, nil)
+    end,
+    ['assigning to a value allows reading from it'] = function()
+        vars.g.testvar2 = true
+        check_eq(vars.g.testvar2, true)
+    end,
+    ['reading from a non-existent v:var results in nil'] = function()
+        check_eq(vars.v.noneexist, nil)
+    end,
+})
 
 function Tests.run_all()
     for k, v in pairs(Tests.cases) do
