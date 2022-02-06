@@ -54,6 +54,18 @@ local hi = require('nle.highlight')
 hi.Cursor = { blend = 100, gui = 'reverse' }
 ```
 
+## variable wrapper
+
+> nle.variables
+```lua
+local vars = require('nle.variables')
+vars.g.myvar = 2
+if vars.g.somevar then
+end
+if vars.g.somevar2 == nil then -- nil if doesn't exist
+end
+```
+
 ## func-store
 
 This is used to provide storage for lua functions to be called from vimscript. The basic usage is to call
