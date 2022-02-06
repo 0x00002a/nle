@@ -6,6 +6,8 @@ local function iterate_mappings(mappings, fn, is_del)
         normal = 'n',
         insert = 'i',
         visual = 'v',
+        all = '',
+        command = 'c',
     }
     for mode, cfg in pairs(mappings) do
         local modePrefix = mode_lookup[mode]
