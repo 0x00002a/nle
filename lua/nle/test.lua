@@ -46,6 +46,27 @@ test_unit('variables', {
         check_eq(vars.v.noneexist, nil)
     end,
 })
+local map = require('nle.map')
+test_unit('map', {
+    ['map can use string with function for mappings'] = function()
+        local fired = false
+        local mappings = {
+            all = {
+                ['j'] = function() fired = true end,
+                ['k'] = {act = function() fired = true end, opts = {silent = true}},
+            }
+        }
+        map.add(mappings)
+        --vim.fn.feedkeys('j')
+        vim.cmd[[normal j]]
+        check_eq(fired, true)
+        fired = false
+        vim.cmd[[normal k]]
+        check_eq(fired, true)
+        map.rm(mappings)
+    end
+}
+)
 
 function Tests.run_all()
     for k, v in pairs(Tests.cases) do

@@ -14,7 +14,16 @@ local function iterate_mappings(mappings, fn, is_del)
         if modePrefix == nil then -- fallback to just the key
             modePrefix = tostring(mode)
         end
-        for _, m in pairs(cfg) do
+        for kh, mo in pairs(cfg) do
+            local m = nil
+            if type(mo) == 'function' then -- allows: ['v'] = func
+                m = { act = mo }
+            else
+                m = vim.deepcopy(mo)
+            end
+            if type(kh) == 'string' then
+                m.seq = kh
+            end
             if is_del then -- skip argument processing if we're just deleting
                 fn(modePrefix, m.seq)
             else
@@ -22,12 +31,11 @@ local function iterate_mappings(mappings, fn, is_del)
                 if opts == nil then
                     opts = {}
                 end
-                local act = m.act
-                if type(act) == 'function' then
-                    local fid = fstore.set(act)
-                    act = ':' .. fstore.fmt_for_vim(fid) .. "<CR>"
+                if type(m.act) == 'function' then
+                    local fid = fstore.set(m.act)
+                    m.act = ':' .. fstore.fmt_for_vim(fid) .. "<CR>"
                 end
-                fn(modePrefix, m.seq, act, opts)
+                fn(modePrefix, m.seq, m.act, opts)
             end
         end
     end
