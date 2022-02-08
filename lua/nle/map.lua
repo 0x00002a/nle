@@ -17,7 +17,7 @@ local function iterate_mappings(mappings, fn, is_del)
         for kh, mo in pairs(cfg) do
             local m = nil
             if type(mo) == 'function' then -- allows: ['v'] = func
-                m = { act = mo }
+                m = { act = mo, opts = { silent = true } }
             else
                 m = vim.deepcopy(mo)
             end
@@ -34,6 +34,9 @@ local function iterate_mappings(mappings, fn, is_del)
                 if type(m.act) == 'function' then
                     local fid = fstore.set(m.act)
                     m.act = ':' .. fstore.fmt_for_vim(fid) .. "<CR>"
+                    if m.opts.silent == nil then -- default to silent
+                        m.opts.silent = true
+                    end
                 end
                 fn(modePrefix, m.seq, m.act, opts)
             end
