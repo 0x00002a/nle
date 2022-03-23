@@ -27,6 +27,10 @@ test_unit("command", {
         local vcmd = cmd.build('TestCmd', func)
         check_eq(vcmd, expected1)
         check_eq(cmd.build('TestCmd', { fn = func }), expected1)
+    end,
+    ["cmd.build with completion produces comp command"] = function()
+        local f = function() end
+        local expected1 = string.format("command -nargs=?")
     end
 })
 local vars = require('nle.variables')

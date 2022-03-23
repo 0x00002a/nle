@@ -12,7 +12,12 @@ local fstore = require('nle.func-store')
 local function args_to_vim(fargs)
     local out = ""
     for ak, av in pairs(fargs) do
-        out = out .. "-" .. ak .. "=" .. av .. " "
+        if ak == 'complete' and type(av) == 'function' then
+            local info = debug.getinfo(av)
+            out = out .. "-" .. ak .. "=custom," .. fstore.fmt_for_vim_cmd(fstore.set(av), info.isvararg or info.nparams > 0) .. " "
+        else
+            out = out .. "-" .. ak .. "=" .. av .. " "
+        end
     end
     return out
 end

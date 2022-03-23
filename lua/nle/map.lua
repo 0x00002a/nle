@@ -33,7 +33,7 @@ local function iterate_mappings(mappings, fn, is_del)
                 end
                 if type(m.act) == 'function' then
                     local fid = fstore.set(m.act)
-                    m.act = ':' .. fstore.fmt_for_vim(fid) .. "<CR>"
+                    m.act = '<cmd>' .. fstore.fmt_for_vim(fid) .. "<CR>"
                     if m.opts.silent == nil then -- default to silent
                         m.opts.silent = true
                     end
