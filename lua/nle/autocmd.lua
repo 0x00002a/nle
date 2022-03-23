@@ -1,7 +1,7 @@
 local fstore = require('nle.func-store')
 -- modified version of: https://gist.github.com/numToStr/1ab83dd2e919de9235f9f774ef8076da
 
-local function autocmd(this, event, spec)
+local function autocmd(this, event, spec, buflocal)
     local is_tbl = type(spec) == 'table'
     local pattern = is_tbl and spec[1] or '*'
     local action = is_tbl and spec[2] or spec
@@ -28,15 +28,20 @@ function M.group(grp, cmds)
             name = {name}
         end
         for _, n in pairs(name) do
-            autocmd(M, n, au)
+            autocmd(M, n, au, false)
         end
     end
     vim.cmd('augroup END')
 end
+M.buf = setmetatable({}, {
+    __index = fstore,
+    __newindex = function(this, event, spec) autocmd(this, event, spec, true) end,
+    __call = function(this, event, spec) autocmd(this, event, spec, true) end,
+})
 
 return setmetatable(M, {
     __index = fstore,
-    __newindex = autocmd,
-    __call = autocmd,
+    __newindex = function(this, event, spec) autocmd(this, event, spec, false) end,
+    __call = function(this, event, spec) autocmd(this, event, spec, false) end,
 })
 
