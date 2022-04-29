@@ -16,10 +16,12 @@ local function iterate_mappings(mappings, fn, is_del)
         end
         for kh, mo in pairs(cfg) do
             local m = nil
-            if type(mo) == 'function' then -- allows: ['v'] = func
+            if type(mo) == 'function' or type(mo) == 'string' then -- allows: ['v'] = func
                 m = { act = mo, opts = { silent = true } }
-            else
+            elseif type(mo) == 'table' then
                 m = vim.deepcopy(mo)
+            else
+                error("invalid type for map value: " .. type(mo))
             end
             if type(kh) == 'string' then
                 m.seq = kh
