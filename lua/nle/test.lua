@@ -68,7 +68,53 @@ test_unit('map', {
         vim.cmd[[normal k]]
         check_eq(fired, true)
         map.rm(mappings)
-    end
+    end,
+    ['map can use string with function for mappings buflocal'] = function()
+        local fired = false
+        local mappings = {
+            all = {
+                ['j'] = function() fired = true end,
+                ['k'] = {act = function() fired = true end, opts = {silent = true}},
+            }
+        }
+        local bufnr = vim.fn.bufnr()
+        map.buf.add(bufnr, mappings)
+        --vim.fn.feedkeys('j')
+        vim.cmd[[normal j]]
+        check_eq(fired, true)
+        fired = false
+        vim.cmd[[normal k]]
+        check_eq(fired, true)
+        map.buf.rm(bufnr, mappings)
+    end,
+    ['map can use string with function for mappings buflocal with nil'] = function()
+        local fired = false
+        local mappings = {
+            all = {
+                ['j'] = function() fired = true end,
+                ['k'] = {act = function() fired = true end, opts = {silent = true}},
+            }
+        }
+        local bufnr = nil
+        map.buf.add(bufnr, mappings)
+        --vim.fn.feedkeys('j')
+        vim.cmd[[normal j]]
+        check_eq(fired, true)
+        fired = false
+        vim.cmd[[normal k]]
+        check_eq(fired, true)
+        map.buf.rm(bufnr, mappings)
+    end,
+
+    ['map can use string with function for mappings buflocal with nil fn'] = function()
+        local function withkey(k)
+            local bufnr = vim.fn.bufnr()
+            local ok, _ = pcall(map.buf.add, bufnr, k)
+            check_eq(ok, false)
+        end
+        withkey({ all = { ['m'] = nil } })
+        withkey({ all = { {seq = 'm', act = nil} } })
+    end,
 }
 )
 

@@ -29,10 +29,7 @@ local function iterate_mappings(mappings, fn, is_del)
             if is_del then -- skip argument processing if we're just deleting
                 fn(modePrefix, m.seq)
             else
-                local opts = m.opts
-                if opts == nil then
-                    opts = {}
-                end
+                local opts = m.opts or {}
                 opts.noremap = ((opts.remap ~= nil) and not opts.remap) or true
                 if type(m.act) == 'function' then
                     local fid = fstore.set(m.act)
@@ -41,6 +38,8 @@ local function iterate_mappings(mappings, fn, is_del)
                         m.opts.silent = true
                     end
                 end
+                assert(m.seq, "sequence for keymap is nil")
+                assert(m.act, "action for " .. m.seq .. " is nil")
                 fn(modePrefix, m.seq, m.act, opts)
             end
         end
@@ -53,10 +52,12 @@ local C = {}
 C.buf = {}
 
 function C.buf.add(bufnr, mappings)
+    bufnr = bufnr or vim.fn.bufnr()
     iterate_mappings(mappings, util.bind(vim.api.nvim_buf_set_keymap, bufnr), false)
 end
 
 function C.buf.rm(bufnr, mappings)
+    bufnr = bufnr or vim.fn.bufnr()
     iterate_mappings(mappings, util.bind(vim.api.nvim_buf_del_keymap, bufnr), true)
 end
 
