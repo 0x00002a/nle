@@ -33,6 +33,7 @@ local function iterate_mappings(mappings, fn, is_del)
                 if opts == nil then
                     opts = {}
                 end
+                opts.noremap = ((opts.remap ~= nil) and not opts.remap) or true
                 if type(m.act) == 'function' then
                     local fid = fstore.set(m.act)
                     m.act = '<cmd>' .. fstore.fmt_for_vim(fid) .. "<CR>"
