@@ -35,8 +35,9 @@ cmd.rm('MyCmd')
 local map = require('nle.map')
 local mappings = {
     normal = {
-        { seq = '<CR>', act = function() dothing end, opts = { silent = true }},
-        { seq = '<C-m>', act = 'vim command', opts = { noremap = true }},
+        { seq = '<CR>', act = function() dothing end, opts = { silent = true }}, -- nmap <silent> <CR> <cmd>lua dothing<CR>
+        { seq = '<C-m>', act = 'vim command', opts = { noremap = true }}, -- nnoremap <C-m> vim command
+        ["<C-j>"] = function() dothing end, -- nmap <silent> <C-j> <cmd>lua dothing<CR>
     }
 }
 
