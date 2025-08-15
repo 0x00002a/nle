@@ -1,7 +1,9 @@
 local util = require('nle.util')
 local fstore = require('nle.func-store')
 
-local function iterate_mappings(mappings, fn, is_del)
+local has_keymap = vim.keymap ~= nil
+
+local function iterate_mappings(mappings, fn, is_del, bufnr)
     local mode_lookup = {
         normal = 'n',
         insert = 'i',
@@ -26,16 +28,22 @@ local function iterate_mappings(mappings, fn, is_del)
             if type(kh) == 'string' then
                 m.seq = kh
             end
+            local opts = m.opts or {}
+            if bufnr ~= nil then
+                opts.buffer = bufnr
+            end
             if is_del then -- skip argument processing if we're just deleting
                 fn(modePrefix, m.seq)
             else
-                local opts = m.opts or {}
                 opts.noremap = ((opts.remap ~= nil) and not opts.remap) or true
-                if type(m.act) == 'function' then
-                    local fid = fstore.set(m.act)
-                    m.act = '<cmd>' .. fstore.fmt_for_vim(fid) .. "<CR>"
-                    if m.opts.silent == nil then -- default to silent
-                        m.opts.silent = true
+                -- if we don't have keymap we have to fallback to the function store approach
+                if not has_keymap then
+                    if type(m.act) == 'function' then
+                        local fid = fstore.set(m.act)
+                        m.act = '<cmd>' .. fstore.fmt_for_vim(fid) .. "<CR>"
+                        if m.opts.silent == nil then -- default to silent
+                            m.opts.silent = true
+                        end
                     end
                 end
                 assert(m.seq, "sequence for keymap is nil")
@@ -48,23 +56,47 @@ end
 
 
 
-local C = {}
+local C = { using_keymap = has_keymap }
 C.buf = {}
 
 function C.buf.add(bufnr, mappings)
     bufnr = bufnr or vim.fn.bufnr()
-    iterate_mappings(mappings, util.bind(vim.api.nvim_buf_set_keymap, bufnr), false)
+    local buf = nil
+    local binding = util.bind(vim.api.nvim_buf_set_keymap, bufnr)
+    if has_keymap then
+        binding = vim.keymap.set
+        buf = bufnr
+    end
+
+    iterate_mappings(mappings, binding, false, buf)
 end
 
 function C.buf.rm(bufnr, mappings)
     bufnr = bufnr or vim.fn.bufnr()
-    iterate_mappings(mappings, util.bind(vim.api.nvim_buf_del_keymap, bufnr), true)
+    local buf = nil
+    local binding = util.bind(vim.api.nvim_buf_del_keymap, bufnr)
+    if has_keymap then
+        binding = vim.keymap.del
+        buf = bufnr
+    end
+    iterate_mappings(mappings, binding, true, buf)
 end
 
 function C.add(mappings)
-    iterate_mappings(mappings, vim.api.nvim_set_keymap, false)
+    local binding = vim.api.nvim_set_keymap
+    if has_keymap then
+        binding = vim.keymap.set
+    end
+    iterate_mappings(mappings, binding, false, nil)
 end
+
 function C.rm(mappings)
-    iterate_mappings(mappings, vim.api.nvim_del_keymap, true)
+    local binding = vim.api.nvim_del_keymap
+    if has_keymap then
+        binding = vim.keymap.del
+    end
+    iterate_mappings(mappings, binding, true, nil)
 end
+
+
 return C
